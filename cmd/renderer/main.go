@@ -21,29 +21,33 @@ const (
 	uiMessage = 
 	"[esc]    to exit\n" +
 	"[w]      to move camera foward\n"+
-	"[s]      to move camera backward\n"
+	"[s]      to move camera backward\n"+
+	"[a]      to move camera to the left\n"+
+	"[d]      to move camera to the right\n"+
+	"[space]  to move camera upward\n"+
+	"[lshift] to move camera downward\n"
 )
 
 var cubeDistance float32 
 
 func initCubeVertices() []la.Vector4 {
 	return []la.Vector4{
-		{X: -0.5, Y: 0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: 0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: 0.5, Z: 0.5, W: 1.0},
-		{X: -0.5, Y: 0.5, Z: 0.5, W: 1.0},
+		{X: -0.5, Y:  0.5, Z: -0.5, W: 1.0},
+		{X:  0.5, Y:  0.5, Z: -0.5, W: 1.0},
+		{X:  0.5, Y:  0.5, Z:  0.5, W: 1.0},
+		{X: -0.5, Y:  0.5, Z:  0.5, W: 1.0},
 		{X: -0.5, Y: -0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: -0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: -0.5, Z: 0.5, W: 1.0},
-		{X: -0.5, Y: -0.5, Z: 0.5, W: 1.0},
-		{X: -0.5, Y: -0.5, Z: 0.5, W: 1.0},
-		{X: 0.5, Y: -0.5, Z: 0.5, W: 1.0},
-		{X: 0.5, Y: 0.5, Z: 0.5, W: 1.0},
-		{X: -0.5, Y: 0.5, Z: 0.5, W: 1.0},
+		{X:  0.5, Y: -0.5, Z: -0.5, W: 1.0},
+		{X:  0.5, Y: -0.5, Z:  0.5, W: 1.0},
+		{X: -0.5, Y: -0.5, Z:  0.5, W: 1.0},
+		{X: -0.5, Y: -0.5, Z:  0.5, W: 1.0},
+		{X:  0.5, Y: -0.5, Z:  0.5, W: 1.0},
+		{X:  0.5, Y:  0.5, Z:  0.5, W: 1.0},
+		{X: -0.5, Y:  0.5, Z:  0.5, W: 1.0},
 		{X: -0.5, Y: -0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: -0.5, Z: -0.5, W: 1.0},
-		{X: 0.5, Y: 0.5, Z: -0.5, W: 1.0},
-		{X: -0.5, Y: 0.5, Z: -0.5, W: 1.0},
+		{X:  0.5, Y: -0.5, Z: -0.5, W: 1.0},
+		{X:  0.5, Y:  0.5, Z: -0.5, W: 1.0},
+		{X: -0.5, Y:  0.5, Z: -0.5, W: 1.0},
 	}
 }
 
@@ -65,6 +69,30 @@ func (g *Game) Update() error {
 		cubeDistance -= 0.2
 	}else if ebiten.IsKeyPressed(ebiten.KeyS) {
 		cubeDistance += 0.2
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		m := la.Matrix4{A: la.Vector4{X: 1.0}, B: la.Vector4{Y: 1.0, W: 0.02}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
+		for i := range g.cubeVertices {
+			g.cubeVertices[i].Dot(m)
+		}
+	} else if ebiten.IsKeyPressed(ebiten.KeyShiftLeft) {
+		m := la.Matrix4{A: la.Vector4{X: 1.0}, B: la.Vector4{Y: 1.0, W: -0.02}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
+		for i := range g.cubeVertices {
+			g.cubeVertices[i].Dot(m)
+		}
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		m := la.Matrix4{A: la.Vector4{X: 1.0, W: 0.02}, B: la.Vector4{Y: 1.0}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
+		for i := range g.cubeVertices {
+			g.cubeVertices[i].Dot(m)
+		}
+	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+		m := la.Matrix4{A: la.Vector4{X: 1.0, W: -0.02}, B: la.Vector4{Y: 1.0}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
+		for i := range g.cubeVertices {
+			g.cubeVertices[i].Dot(m)
+		}
 	}
 
 	return nil
