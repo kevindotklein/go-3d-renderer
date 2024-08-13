@@ -8,5 +8,7 @@ const (
 		"[d]        to move camera to the right\n" +
 		"[space]    to move camera upward\n" +
 		"[lshift]   to move camera downward\n" +
-		"[i]        to toggle infos\n"
+		"[i]        to toggle infos\n" +
+		"[c]        to load cube model\n" +
+		"[p]        to load pyramid model\n"
 )

@@ -8,4 +8,6 @@ const (
 	SpaceLabel  = "[space]"
 	LshiftLabel = "[lshift]"
 	ILabel      = "[i]"
+	CLabel      = "[c]"
+	PLabel      = "[p]"
 )
