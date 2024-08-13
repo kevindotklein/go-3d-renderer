@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"math"
 	"os"
 
+	"github.com/kevindotklein/go-3d-renderer/cmd/ui"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/kevindotklein/go-3d-renderer/pkg/la"
@@ -17,18 +21,11 @@ const (
 	screenWidth  = 1920
 	screenHeight = 1080
 	fov          = 45
-
-	uiMessage = 
-	"[esc]    to exit\n" +
-	"[w]      to move camera foward\n"+
-	"[s]      to move camera backward\n"+
-	"[a]      to move camera to the left\n"+
-	"[d]      to move camera to the right\n"+
-	"[space]  to move camera upward\n"+
-	"[lshift] to move camera downward\n"
 )
 
-var cubeDistance float32 
+var cubeDistance float32
+var inputLabel string
+var toggleInfo bool
 
 func initCubeVertices() []la.Vector4 {
 	return []la.Vector4{
@@ -53,6 +50,7 @@ func initCubeVertices() []la.Vector4 {
 
 type Game struct {
 	cubeVertices []la.Vector4
+	keyStates    map[ebiten.Key]int
 }
 
 func point3Dto2D(point, z float32) float32 {
@@ -67,8 +65,10 @@ func (g *Game) Update() error {
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		cubeDistance -= 0.2
-	}else if ebiten.IsKeyPressed(ebiten.KeyS) {
+		inputLabel = ui.WLabel
+	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
 		cubeDistance += 0.2
+		inputLabel = ui.SLabel
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
@@ -76,11 +76,13 @@ func (g *Game) Update() error {
 		for i := range g.cubeVertices {
 			g.cubeVertices[i].Dot(m)
 		}
+		inputLabel = ui.SpaceLabel
 	} else if ebiten.IsKeyPressed(ebiten.KeyShiftLeft) {
 		m := la.Matrix4{A: la.Vector4{X: 1.0}, B: la.Vector4{Y: 1.0, W: -0.02}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
 		for i := range g.cubeVertices {
 			g.cubeVertices[i].Dot(m)
 		}
+		inputLabel = ui.LshiftLabel
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
@@ -88,10 +90,27 @@ func (g *Game) Update() error {
 		for i := range g.cubeVertices {
 			g.cubeVertices[i].Dot(m)
 		}
+		inputLabel = ui.ALabel
 	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
 		m := la.Matrix4{A: la.Vector4{X: 1.0, W: -0.02}, B: la.Vector4{Y: 1.0}, C: la.Vector4{Z: 1.0}, D: la.Vector4{W: 1.0}}
 		for i := range g.cubeVertices {
 			g.cubeVertices[i].Dot(m)
+		}
+		inputLabel = ui.DLabel
+	}
+
+	for k := ebiten.Key(0); k <= ebiten.KeyMax; k++ {
+		if inpututil.IsKeyJustPressed(k) {
+			g.keyStates[k] = 1
+		} else if ebiten.IsKeyPressed(k) {
+			g.keyStates[k]++
+		} else {
+			g.keyStates[k] = 0
+		}
+
+		if k == ebiten.KeyI && g.keyStates[k] == 1 {
+			toggleInfo = !toggleInfo
+			inputLabel = ui.ILabel
 		}
 	}
 
@@ -113,10 +132,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	for _, v := range g.cubeVertices {
-		drawVertex(screen, v, color.RGBA{0, 255, 0, 255})
+		drawVertex(screen, v, color.RGBA{0, 255, 0, 255}, toggleInfo)
 	}
 
-	text.Draw(screen, uiMessage, basicfont.Face7x13, 20, 30, color.White)	
+	text.Draw(screen, ui.UiMessage, basicfont.Face7x13, 20, 30, color.White)
+	text.Draw(screen, inputLabel, basicfont.Face7x13, screenWidth-180, screenHeight-100, color.White)
+	if toggleInfo {
+		text.Draw(screen, fmt.Sprintf("distance: %.1f", cubeDistance), basicfont.Face7x13, screenWidth-130, 30, color.White)
+	}
 }
 
 func drawLine(screen *ebiten.Image, v1, v2 la.Vector4, clr color.RGBA) {
@@ -128,11 +151,13 @@ func drawLine(screen *ebiten.Image, v1, v2 la.Vector4, clr color.RGBA) {
 		1, clr, false)
 }
 
-func drawVertex(screen *ebiten.Image, v la.Vector4, clr color.RGBA) {
-	vector.DrawFilledCircle(screen,
-		point3Dto2D(v.X, v.Z+cubeDistance)*screenWidth+screenWidth/2,
-		point3Dto2D(v.Y, v.Z+cubeDistance)*screenHeight+screenHeight/2,
-		2, clr, false)
+func drawVertex(screen *ebiten.Image, v la.Vector4, clr color.RGBA, coord bool) {
+	x := point3Dto2D(v.X, v.Z+cubeDistance)*screenWidth + screenWidth/2
+	y := point3Dto2D(v.Y, v.Z+cubeDistance)*screenHeight + screenHeight/2
+	vector.DrawFilledCircle(screen, x, y, 2, clr, false)
+	if coord {
+		text.Draw(screen, fmt.Sprintf("(%.1f, %.1f, %.1f)", v.X, v.Y, v.Z+cubeDistance), basicfont.Face7x13, int(x+10), int(y-20), color.White)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -142,9 +167,10 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	ebiten.SetFullscreen(true)
 	ebiten.SetWindowTitle("3d renderer")
-	cubeDistance = 10
+	cubeDistance = 5
+	toggleInfo   = true
 
-	game := &Game{cubeVertices: initCubeVertices()}
+	game := &Game{cubeVertices: initCubeVertices(), keyStates: make(map[ebiten.Key]int)}
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
