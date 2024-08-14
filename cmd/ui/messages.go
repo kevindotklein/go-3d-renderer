@@ -11,6 +11,7 @@ const (
 		"[i]             to toggle infos\n" +
 		"[c]             to load cube model\n" +
 		"[p]             to load pyramid model\n" +
+		"[h]             to load hexagon prism model\n" +
 		"[arrow up]      to rotate the z axis toward\n" +
 		"[arrow down]    to rotate the z axis backward\n" +
 		"[arrow left]    to rotate the x axis to the left\n" +

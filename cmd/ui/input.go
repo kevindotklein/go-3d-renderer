@@ -16,4 +16,5 @@ const (
 	ArrowLeftLabel  = "[arrow left]"
 	JLabel          = "[j]"
 	KLabel          = "[k]"
+	HLabel          = "[h]"
 )

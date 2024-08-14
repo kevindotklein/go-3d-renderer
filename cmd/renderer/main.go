@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/kevindotklein/go-3d-renderer/cmd/cube"
+	"github.com/kevindotklein/go-3d-renderer/cmd/hexagonalprism"
 	"github.com/kevindotklein/go-3d-renderer/cmd/pyramid"
 	"github.com/kevindotklein/go-3d-renderer/cmd/ui"
 
@@ -22,7 +23,7 @@ import (
 const (
 	screenWidth  = 1920
 	screenHeight = 1080
-	fov          = 45
+	fov          = 90
 	xSpeed       = 0.02
 	ySpeed       = 0.02
 	zSpeed       = 0.08
@@ -33,6 +34,7 @@ type model uint8
 const (
 	cubeModel model = iota
 	pyramidModel
+	hexagonPrismModel
 )
 
 var distance float32
@@ -150,6 +152,10 @@ func (g *Game) Update() error {
 			g.vertices = cube.InitCubeVertices()
 			currentModel = cubeModel
 			inputLabel = ui.CLabel
+		} else if k == ebiten.KeyH && g.keyStates[k] == 1 {
+			g.vertices = hexagonalprism.InitHexagonPrismVertices()
+			currentModel = hexagonPrismModel
+			inputLabel = ui.HLabel
 		}
 
 	}
@@ -163,6 +169,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			renderCube(screen, g)
 		case pyramidModel:
 			renderPyramid(screen, g)
+		case hexagonPrismModel:
+			renderHexagonPrism(screen, g)
 		default:
 			renderCube(screen, g)
 	}
@@ -203,6 +211,24 @@ func renderPyramid(screen *ebiten.Image, g *Game) {
 	}
 
 	// vertical lines
+	for _, v := range g.vertices {
+		drawVertex(screen, v, color.RGBA{0, 255, 0, 255}, toggleInfo)
+	}
+}
+
+func renderHexagonPrism(screen *ebiten.Image, g *Game) {
+	for i := 0; i < 6; i++ {
+		drawLine(screen, g.vertices[i], g.vertices[(i+1)%6], color.RGBA{255, 0, 0, 255})
+	}
+
+	for i := 6; i < 12; i++ {
+		drawLine(screen, g.vertices[i], g.vertices[6+(i-6+1)%6], color.RGBA{255, 0, 0, 255})
+	}
+
+	for i := 0; i < 6; i++ {
+		drawLine(screen, g.vertices[i], g.vertices[i+6], color.RGBA{255, 0, 0, 255})
+	}
+
 	for _, v := range g.vertices {
 		drawVertex(screen, v, color.RGBA{0, 255, 0, 255}, toggleInfo)
 	}
