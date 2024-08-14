@@ -1,10 +1,8 @@
 ## Video
 
 <div align="center">
-  <video width="560" height="315" controls>
-    <source src="./videos/video-8-13-2024.mp4" type="video/mp4">
-    your browser does not support the video tag
-  </video>
+  <iframe width="560" height="315" src="https://www.youtube.com/watch?v=9L8lAzFhXFo" 
+  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
 ## Installation
