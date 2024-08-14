@@ -1,6 +1,9 @@
 package la
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 //https://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
 
@@ -22,6 +25,22 @@ func (v *Vector4) Dot(m Matrix4) {
 	v.Y = Y
 	v.Z = Z
 	v.W = W
+}
+
+// https://en.wikipedia.org/wiki/Rotation_matrix#General_rotations
+func (v *Vector4) Rotate(yaw, pitch, roll float64) {
+
+	X := math.Cos(yaw) * math.Cos(pitch) * float64(v.X) + (math.Cos(yaw) * math.Sin(pitch) * math.Sin(roll) - math.Sin(yaw) * math.Cos(roll)) * 
+			 float64(v.Y) + (math.Cos(yaw) * math.Sin(pitch) * math.Cos(roll) + math.Sin(yaw) * math.Sin(roll)) * float64(v.Z)
+
+	Y := math.Sin(yaw) * math.Cos(pitch) * float64(v.X) + (math.Sin(yaw) * math.Sin(pitch) * math.Sin(roll) + math.Cos(yaw) * math.Cos(roll)) *
+		   float64(v.Y) + (math.Sin(yaw) * math.Sin(pitch) * math.Cos(roll) - math.Cos(yaw) * math.Sin(roll)) * float64(v.Z)
+
+	Z := -math.Sin(pitch) * float64(v.X) + math.Cos(pitch) * math.Sin(roll) * float64(v.Y) + math.Cos(pitch) * math.Cos(roll) * float64(v.Z)
+
+	v.X = float32(X)
+	v.Y = float32(Y)
+	v.Z = float32(Z)
 }
 
 func (v Vector4) String() string {

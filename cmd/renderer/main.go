@@ -39,6 +39,7 @@ var distance float32
 var inputLabel string
 var toggleInfo bool
 var currentModel model
+var rotationRadians float64
 
 type Game struct {
 	vertices     []la.Vector4
@@ -53,6 +54,42 @@ func point3Dto2D(point, z float32) float32 {
 func (g *Game) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(0)
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(0, 0, -rotationRadians)
+		}
+		inputLabel = ui.ArrowUpLabel
+	} else if ebiten.IsKeyPressed(ebiten.KeyArrowDown) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(0, 0, rotationRadians)
+		}
+		inputLabel = ui.ArrowDownLabel
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(0, rotationRadians, 0)
+		}
+		inputLabel = ui.ArrowLeftLabel
+	} else if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(0, -rotationRadians, 0)
+		}
+		inputLabel = ui.ArrowRightLabel
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyJ) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(-rotationRadians, 0, 0)
+		}
+		inputLabel = ui.JLabel
+	} else if ebiten.IsKeyPressed(ebiten.KeyK) {
+		for i := range g.vertices {
+			g.vertices[i].Rotate(rotationRadians, 0, 0)
+		}
+		inputLabel = ui.KLabel
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
@@ -115,7 +152,6 @@ func (g *Game) Update() error {
 			inputLabel = ui.CLabel
 		}
 
-		
 	}
 
 	return nil
@@ -197,9 +233,10 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	ebiten.SetFullscreen(true)
 	ebiten.SetWindowTitle("3d renderer")
-	distance     = 5
-	toggleInfo   = true
-	currentModel = cubeModel
+	distance        = 5
+	toggleInfo      = true
+	currentModel    = cubeModel
+	rotationRadians = (float64(1) / float64(180)) * math.Pi
 
 	game := &Game{vertices: cube.InitCubeVertices(), keyStates: make(map[ebiten.Key]int)}
 
