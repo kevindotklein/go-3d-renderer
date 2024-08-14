@@ -164,15 +164,17 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	switch currentModel {
-		case cubeModel:
-			renderCube(screen, g)
-		case pyramidModel:
-			renderPyramid(screen, g)
-		case hexagonPrismModel:
-			renderHexagonPrism(screen, g)
-		default:
-			renderCube(screen, g)
+	if distance > 0.5 {
+		switch currentModel {
+			case cubeModel:
+				renderCube(screen, g)
+			case pyramidModel:
+				renderPyramid(screen, g)
+			case hexagonPrismModel:
+				renderHexagonPrism(screen, g)
+			default:
+				renderCube(screen, g)
+		}
 	}
 
 	text.Draw(screen, ui.UiMessage, basicfont.Face7x13, 20, 30, color.White)
